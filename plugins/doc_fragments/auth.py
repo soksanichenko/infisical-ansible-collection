@@ -109,6 +109,23 @@ _TOKEN_AUTH_MODULE = """
     no_log: true
 """
 
+# Login-specific variant. The login module returns this value as C(login_data.access_token),
+# so C(no_log) must be disabled (otherwise Ansible scrubs the identical return value). The
+# description warns operators that the token therefore appears in verbose output and logs.
+_TOKEN_AUTH_LOGIN_MODULE = """
+  token:
+    description:
+      - An access token used to authenticate with Infisical. This can be either a Machine Identity
+        Token Auth token or a User JWT token. Both token types can be used interchangeably with this field.
+      - >-
+        For C(token_auth), this value is returned unchanged as C(access_token) in the login data. So that
+        it stays usable by later tasks, C(no_log) is disabled for this option, which means the token is
+        visible in verbose output (C(-v)/C(-vvv)), in any file set via C(ANSIBLE_LOG_PATH), and in CI/CD
+        logs. Set C(no_log: true) on the task to keep it out of output and logs.
+    type: str
+    no_log: false
+"""
+
 _LDAP_AUTH_MODULE = """
   ldap_username:
     description: The LDAP username used to authenticate (for ldap_auth).
@@ -182,7 +199,7 @@ options:
         auth_method=_AUTH_METHOD_MODULE,
         universal_auth=_UNIVERSAL_AUTH_MODULE,
         oidc_auth=_OIDC_AUTH_MODULE,
-        token_auth=_TOKEN_AUTH_MODULE,
+        token_auth=_TOKEN_AUTH_LOGIN_MODULE,
         ldap_auth=_LDAP_AUTH_MODULE,
     )
 

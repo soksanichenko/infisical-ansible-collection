@@ -21,6 +21,15 @@ seealso:
 
 notes:
   - The returned login data contains the access token and can be registered for reuse in subsequent tasks.
+  - >
+    For C(token_auth), the value passed in C(token) is returned unchanged as C(access_token) in the login
+    data. So that it stays usable by later tasks, C(no_log) is disabled for the C(token) option, which means
+    the token appears in verbose output (C(-v)/C(-vvv)), in any file set via C(ANSIBLE_LOG_PATH), and in
+    CI/CD logs. This does not apply to the other authentication methods, whose returned token differs from
+    the credentials you supply.
+  - >
+    To keep the token out of output and logs, set C(no_log: true) on this task. The registered login data
+    still contains the usable token for subsequent tasks.
 """
 
 EXAMPLES = r"""
@@ -101,7 +110,11 @@ def run_module():
         universal_auth_client_secret=dict(type='str', no_log=True),
         identity_id=dict(type='str'),
         jwt=dict(type='str', no_log=True),
-        token=dict(type='str', no_log=True),
+        # token_auth returns this same value as login_data.access_token. With
+        # no_log=True, Ansible's remove_values() scrubs it to
+        # "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER" in the registered result, which
+        # then fails downstream as a malformed bearer token.
+        token=dict(type='str', no_log=False),
         ldap_username=dict(type='str'),
         ldap_password=dict(type='str', no_log=True),
     )
