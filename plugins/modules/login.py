@@ -101,7 +101,11 @@ def run_module():
         universal_auth_client_secret=dict(type='str', no_log=True),
         identity_id=dict(type='str'),
         jwt=dict(type='str', no_log=True),
-        token=dict(type='str', no_log=True),
+        # token_auth returns this same value as login_data.access_token. With
+        # no_log=True, Ansible's remove_values() scrubs it to
+        # "VALUE_SPECIFIED_IN_NO_LOG_PARAMETER" in the registered result, which
+        # then fails downstream as a malformed bearer token.
+        token=dict(type='str', no_log=False),
         ldap_username=dict(type='str'),
         ldap_password=dict(type='str', no_log=True),
     )
